@@ -1,37 +1,144 @@
-// client.js — configuração ÚNICA do Axios (biblioteca que faz as requisições HTTP).
-// Todo o app fala com o backend através deste "api", então a URL base e o
-// tratamento de erro ficam centralizados em um lugar só.
-
 import axios from "axios";
+import seed from "../../db.json";
 
-// Endereço do backend (JSON Server). Em produção, o Vite lê a variável
-// VITE_API_URL; em desenvolvimento, usa o localhost na porta 3001.
-const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+// Se VITE_API_URL estiver definida, falamos com um backend real via Axios.
+const baseURL = import.meta.env.VITE_API_URL;
 
-// Cria uma instância do Axios já configurada (base, cabeçalho JSON e
-// timeout de 8s para não travar a tela se o servidor não responder).
-const api = axios.create({
-  baseURL,
-  headers: { "Content-Type": "application/json" },
-  timeout: 8000,
-});
-
-// Converte QUALQUER erro técnico do Axios em uma mensagem clara em português.
+// Converte QUALQUER erro em uma mensagem clara em português.
 // As telas chamam esta função para mostrar um aviso amigável ao usuário.
 export function mensagemErro(err) {
-  // Estourou o timeout de 8s.
-  if (err.code === "ECONNABORTED") return "Tempo de conexão esgotado. Tente novamente.";
-  // O servidor respondeu, mas com erro (ex.: 404, 500).
-  if (err.response) {
+  if (err?.code === "ECONNABORTED") return "Tempo de conexão esgotado. Tente novamente.";
+  if (err?.response) {
     if (err.response.status === 404) return "Registro não encontrado.";
     return `Erro no servidor (${err.response.status}).`;
   }
-  // A requisição saiu mas não houve resposta (servidor desligado).
-  if (err.request) {
-    return "Não foi possível conectar ao servidor. Verifique se o JSON Server está rodando (npm run server).";
+  if (err?.request) {
+    return "Não foi possível conectar ao servidor.";
   }
-  // Qualquer outro caso inesperado.
-  return "Ocorreu um erro inesperado.";
+  return err?.friendly || "Ocorreu um erro inesperado.";
 }
+
+// ────────────────────────────────────────────────────────────────────────
+// BACKEND DE MENTIRA (localStorage) — usado quando não há VITE_API_URL.
+// ────────────────────────────────────────────────────────────────────────
+
+const STORE_KEY = "sleepwise:db";
+
+// Lê o "banco" do localStorage; na primeira vez, semeia com o db.json.
+function carregarDB() {
+  try {
+    const salvo = localStorage.getItem(STORE_KEY);
+    if (salvo) return JSON.parse(salvo);
+  } catch {
+    // dado corrompido: recomeça do seed
+  }
+  const inicial = {
+    users: (seed.users || []).map((u) => ({ ...u })),
+    registros: (seed.registros || []).map((r) => ({ ...r })),
+  };
+  salvarDB(inicial);
+  return inicial;
+}
+
+function salvarDB(db) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(db));
+}
+
+// Gera um id curto (como o JSON Server faz por padrão).
+function gerarId() {
+  return Math.random().toString(36).slice(2, 10);
+}
+
+// Simula o atraso de rede e devolve no formato do Axios ({ data }).
+function resposta(data) {
+  return Promise.resolve({ data });
+}
+
+// Cria um erro no "formato Axios" para o mensagemErro reconhecer (ex.: 404).
+function erroHttp(status) {
+  const err = new Error(`HTTP ${status}`);
+  err.response = { status };
+  return err;
+}
+
+// Divide "/registros/abc?x=1" em { colecao: "registros", id: "abc" }.
+function parseUrl(url) {
+  const semQuery = url.split("?")[0];
+  const partes = semQuery.split("/").filter(Boolean); // remove vazios
+  return { colecao: partes[0], id: partes[1] };
+}
+
+// Filtra a coleção pelos params passados (ex.: { email } ou { userId }).
+function filtrarPorParams(itens, params = {}) {
+  const chaves = Object.keys(params).filter((k) => params[k] !== undefined);
+  if (chaves.length === 0) return itens;
+  return itens.filter((item) => chaves.every((k) => String(item[k]) === String(params[k])));
+}
+
+const mockApi = {
+  async get(url, config = {}) {
+    const db = carregarDB();
+    const { colecao, id } = parseUrl(url);
+    const itens = db[colecao] || [];
+    if (id) {
+      const achado = itens.find((i) => String(i.id) === String(id));
+      if (!achado) throw erroHttp(404);
+      return resposta(achado);
+    }
+    return resposta(filtrarPorParams(itens, config.params));
+  },
+
+  async post(url, body) {
+    const db = carregarDB();
+    const { colecao } = parseUrl(url);
+    if (!db[colecao]) db[colecao] = [];
+    const novo = { ...body, id: body?.id ?? gerarId() };
+    db[colecao].push(novo);
+    salvarDB(db);
+    return resposta(novo);
+  },
+
+  async put(url, body) {
+    const db = carregarDB();
+    const { colecao, id } = parseUrl(url);
+    const itens = db[colecao] || [];
+    const idx = itens.findIndex((i) => String(i.id) === String(id));
+    if (idx === -1) throw erroHttp(404);
+    const atualizado = { ...body, id: itens[idx].id };
+    itens[idx] = atualizado;
+    salvarDB(db);
+    return resposta(atualizado);
+  },
+
+  async patch(url, body) {
+    const db = carregarDB();
+    const { colecao, id } = parseUrl(url);
+    const itens = db[colecao] || [];
+    const idx = itens.findIndex((i) => String(i.id) === String(id));
+    if (idx === -1) throw erroHttp(404);
+    const atualizado = { ...itens[idx], ...body, id: itens[idx].id };
+    itens[idx] = atualizado;
+    salvarDB(db);
+    return resposta(atualizado);
+  },
+
+  async delete(url) {
+    const db = carregarDB();
+    const { colecao, id } = parseUrl(url);
+    const itens = db[colecao] || [];
+    db[colecao] = itens.filter((i) => String(i.id) !== String(id));
+    salvarDB(db);
+    return resposta({});
+  },
+};
+
+// Se houver VITE_API_URL, usa Axios de verdade; senão, o mock local.
+const api = baseURL
+  ? axios.create({
+      baseURL,
+      headers: { "Content-Type": "application/json" },
+      timeout: 8000,
+    })
+  : mockApi;
 
 export default api;
