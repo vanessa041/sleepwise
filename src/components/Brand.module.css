@@ -1,0 +1,48 @@
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.mark {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--grad);
+  border-radius: 26%;
+  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.45);
+}
+
+.z {
+  position: absolute;
+  top: 14%;
+  right: 14%;
+  color: #fff;
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1;
+}
+
+.word {
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
+}
+.word span {
+  color: var(--primary-soft);
+}
+
+/* tamanhos */
+.md .mark { width: 76px; height: 76px; }
+.md .word { font-size: 1.9rem; }
+.md .z { font-size: 1rem; }
+
+.lg .mark { width: 104px; height: 104px; }
+.lg .word { font-size: 2.6rem; }
+.lg .z { font-size: 1.4rem; }
+
+.sm .mark { width: 44px; height: 44px; }
+.sm .word { font-size: 1.25rem; }
+.sm .z { font-size: 0.7rem; }

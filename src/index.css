@@ -1,0 +1,155 @@
+:root {
+  /* Base / superfícies */
+  --bg-0: #0d0a1a;
+  --bg-1: #140f28;
+  --bg-2: #1b1436;
+  --surface: #1f1840;
+  --surface-2: #271d52;
+  --border: #33285e;
+
+  /* Marca */
+  --primary: #8b5cf6;
+  --primary-strong: #7c3aed;
+  --primary-soft: #a78bfa;
+  --grad: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+
+  /* Texto */
+  --text: #f5f3ff;
+  --text-muted: #b6aee0;
+  --text-dim: #8b83b8;
+
+  /* Estados / métricas */
+  --good: #22c55e;
+  --moderate: #f59e0b;
+  --bad: #ef4444;
+  --water: #38bdf8;
+  --exercise: #34d399;
+  --stress: #fb923c;
+
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+  color-scheme: dark;
+  font-family: "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  color: var(--text);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(124, 58, 237, 0.25), transparent 60%),
+    radial-gradient(900px 500px at -10% 10%, rgba(56, 189, 248, 0.08), transparent 55%),
+    var(--bg-0);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--primary-soft);
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+/* Elementos utilitários reaproveitados por várias telas */
+.btn-primary {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: var(--grad);
+  transition: transform 0.08s ease, filter 0.15s ease;
+}
+.btn-primary:hover {
+  filter: brightness(1.08);
+}
+.btn-primary:active {
+  transform: translateY(1px);
+}
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 13px 18px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text);
+  background: transparent;
+  transition: background 0.15s ease;
+}
+.btn-ghost:hover {
+  background: var(--surface-2);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.field label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.field input,
+.field select {
+  width: 100%;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-size: 0.98rem;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.field input:focus,
+.field select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+.field .error-text {
+  color: var(--bad);
+  font-size: 0.8rem;
+}
+.field input.invalid,
+.field select.invalid {
+  border-color: var(--bad);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}

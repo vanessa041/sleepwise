@@ -1,0 +1,49 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+.chip.sono { background: rgba(139, 92, 246, 0.22); color: var(--primary-soft); }
+.chip.agua { background: rgba(56, 189, 248, 0.18); color: var(--water); }
+.chip.ex { background: rgba(52, 211, 153, 0.18); color: var(--exercise); }
+.chip.stress { background: rgba(251, 146, 60, 0.18); color: var(--stress); }
+
+.titulo {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.valor {
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.valor small {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-left: 3px;
+}
+
+.status {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
